@@ -1,12 +1,10 @@
-// app.js — V2.2-B Stable（由 app拷貝.js 修正）
-// 修正內容：
-// ✅ 最後一欄「路線」使用 route-cell，不再跑位
-// ✅ 不影響 Excel / eTag / PDF / 計算邏輯
+// app.js — V2.2.2 Stable
+// 修正：匯入 eTag PDF 後，所有列（含無 eTag）皆可正確計算總和
 
 var ORIGIN_ADDRESS = "台中市西屯區台灣大道四段771號";
 var ORIGIN_DISPLAY = "台中市";
 
-// ===== 修正：注入 route-cell 對齊用 CSS =====
+// ===== route-cell 對齊樣式 =====
 (function injectRouteStyle() {
   var style = document.createElement('style');
   style.textContent = `
@@ -20,13 +18,10 @@ var ORIGIN_DISPLAY = "台中市";
   document.head.appendChild(style);
 })();
 
-// ===== Excel 匯入（保持原本邏輯） =====
+// ===== Excel 匯入 =====
 document.addEventListener('DOMContentLoaded', function () {
   var excelInput = document.getElementById('excelFile');
-  if (!excelInput) {
-    console.error('❌ 找不到 excelFile');
-    return;
-  }
+  if (!excelInput) return;
 
   excelInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
@@ -36,23 +31,16 @@ document.addEventListener('DOMContentLoaded', function () {
     reader.onload = function (evt) {
       var wb = XLSX.read(evt.target.result, { type: 'binary' });
       var sheet = wb.Sheets[wb.SheetNames[0]];
-
       var raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
       var headerRow = -1;
       for (var i = 0; i < raw.length; i++) {
         for (var j = 0; j < raw[i].length; j++) {
-          if (String(raw[i][j]).indexOf('申請') !== -1) {
-            headerRow = i;
-            break;
-          }
+          if (String(raw[i][j]).indexOf('申請') !== -1) { headerRow = i; break; }
         }
         if (headerRow !== -1) break;
       }
-
-      if (headerRow === -1) {
-        alert('❌ 找不到 Excel 表頭');
-        return;
-      }
+      if (headerRow === -1) { alert('❌ 找不到 Excel 表頭'); return; }
 
       var rows = XLSX.utils.sheet_to_json(sheet, { range: headerRow, defval: '' });
       var tbody = document.querySelector('#resultTable tbody');
@@ -82,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!date && !location && !reason && !formId) continue;
 
         var tr = document.createElement('tr');
-        function td(t){ var d=document.createElement('td'); d.textContent=t||''; return d; }
+        function td(v){ var d=document.createElement('td'); d.textContent=v||''; return d; }
 
         tr.appendChild(td(date));
         tr.appendChild(td(ORIGIN_DISPLAY));
@@ -97,77 +85,52 @@ document.addEventListener('DOMContentLoaded', function () {
         var total = document.createElement('td'); tr.appendChild(total);
         tr.appendChild(td(formId));
 
-        // ===== Google Maps 路線（加上 route-cell） =====
-        var mapTd = document.createElement('td');
-        mapTd.className = 'route-cell';
-
-        var mapLink = document.createElement('a');
-        mapLink.textContent = '開啟路線';
-        mapLink.target = '_blank';
-
-        var waypoints = [];
-        if (reason) {
-          var parts = String(reason).split('\n');
-          for (var w = 0; w < parts.length; w++) {
-            var p = parts[w].trim();
-            if (p) waypoints.push(p);
-          }
-        }
-
+        var mapTd = document.createElement('td'); mapTd.className='route-cell';
+        var a = document.createElement('a'); a.target='_blank'; a.textContent='開啟路線';
         var mapUrl = 'https://www.google.com/maps/dir/?api=1';
         mapUrl += '&origin=' + encodeURIComponent(ORIGIN_ADDRESS);
-        if (waypoints.length > 0) {
-          mapUrl += '&waypoints=' + encodeURIComponent(waypoints.join('|'));
-        }
+        if (reason) mapUrl += '&waypoints=' + encodeURIComponent(reason);
         mapUrl += '&destination=' + encodeURIComponent(ORIGIN_ADDRESS);
-
-        mapLink.href = mapUrl;
-        mapTd.appendChild(mapLink);
-        tr.appendChild(mapTd);
+        a.href = mapUrl; mapTd.appendChild(a); tr.appendChild(mapTd);
 
         tbody.appendChild(tr);
 
-        function calc() {
+        function calc(){
           var p = parseFloat(parking.textContent) || 0;
           var e = parseFloat(etag.textContent) || 0;
           var h = parseFloat(hsr.textContent) || 0;
-          var s = p + e + h;
-          total.textContent = s ? s : '';
+          total.textContent = (p + e + h) || '';
         }
+
+        calc();
         parking.addEventListener('input', calc);
         hsr.addEventListener('input', calc);
       }
     };
-
     reader.readAsBinaryString(file);
   });
 });
 
-// ===== eTag 金額回填（欄位對齊版本，路線不受影響） =====
+// ===== eTag 回填（重點修正） =====
 window.fillEtagByDate = function (etagMap) {
   var rows = document.querySelectorAll('#resultTable tbody tr');
   for (var i = 0; i < rows.length; i++) {
     var tds = rows[i].getElementsByTagName('td');
     if (!tds || tds.length < 12) continue;
 
-    var IDX_DATE = 0;
-    var IDX_PARKING = 6;
-    var IDX_HSR = 8;
-    var IDX_ETAG = 7;
-    var IDX_TOTAL = 9;
-
+    var IDX_DATE=0, IDX_PARKING=6, IDX_ETAG=7, IDX_HSR=8, IDX_TOTAL=9;
     var date = tds[IDX_DATE].textContent.trim();
-    if (!etagMap[date]) continue;
 
-    var etagVal = parseFloat(etagMap[date]) || 0;
-    tds[IDX_ETAG].textContent = etagVal;
+    var p = parseFloat(tds[IDX_PARKING].textContent) || 0;
+    var h = parseFloat(tds[IDX_HSR].textContent) || 0;
+    var e = etagMap[date] ? parseFloat(etagMap[date]) || 0 : 0;
 
-    var parking = parseFloat(tds[IDX_PARKING].textContent) || 0;
-    var hsr = parseFloat(tds[IDX_HSR].textContent) || 0;
-    var total = parking + hsr + etagVal;
+    if (etagMap[date]) {
+      tds[IDX_ETAG].textContent = e;
+    }
 
-    tds[IDX_TOTAL].textContent = total ? total : '';
+    tds[IDX_TOTAL].textContent = (p + e + h) || '';
   }
 };
 
-console.log('[app] app拷貝.js 已升級為 V2.2-B route-cell 修正版');
+console.log('[app] V2.2.2 修正完成：無 eTag 列亦會計算總和');

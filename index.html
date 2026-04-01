@@ -2,8 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>外出經費申請輔助系統 V2.2 Stable</title>
-
+  <title>外出經費申請輔助系統 V2.2.3 Stable</title>
   <style>
     body {
       font-family: "Microsoft JhengHei", Arial, sans-serif;
@@ -34,16 +33,35 @@
       margin-right: 8px;
       padding: 6px 12px;
     }
+    .usage {
+      background: #f9f9ff;
+      border: 1px solid #ccd;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .usage ol {
+      margin: 6px 0 0 18px;
+    }
   </style>
 </head>
 <body>
 
-<h2>外出經費申請輔助系統 V2.2 Stable</h2>
+<h2>外出經費申請輔助系統 V2.2.3 Stable</h2>
+
+<!-- ✅ 使用步驟說明 -->
+<div class="usage">
+  <strong>使用步驟：</strong>
+  <ol>
+    <li>匯入 104 HR 外出單（Excel 檔案）</li>
+    <li>手動填入停車費與高鐵／車票金額（黃色欄位）</li>
+    <li>匯入 eTag 過路費 PDF（系統會自動對應日期計算）</li>
+  </ol>
+</div>
 
 <div class="toolbar">
   <input type="file" id="excelFile" accept=".xlsx" />
   <button id="etagBtn">匯入 eTag PDF</button>
-  <input type="file" id="etagFile" accept="application/pdf" style="display:none;">
+  <input type="file" id="etagFile" accept="application/pdf" style="display:none;" />
 </div>
 
 <table id="resultTable">
