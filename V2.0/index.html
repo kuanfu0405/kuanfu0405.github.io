@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>外出經費申請輔助系統（V2.0）</title>
+
+  <!-- Excel library -->
+  <script src="../xlsx.full.min.js"></script>
+
+  <!-- V2.0 app.js（先與 V1.1 相同，下一步才改）-->
+  <script src="./app.js"></script>
+
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      margin-bottom: 12px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 16px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+    th {
+      background-color: #f3f3f3;
+      text-align: center;
+      white-space: nowrap;
+    }
+    td[contenteditable] {
+      background-color: #fffdf2;
+    }
+    select {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>外出經費申請輔助系統（V2.0）</h2>
+
+<!-- Excel 匯入 -->
+<input type="file" id="excelFile" accept=".xlsx" />
+
+<table id="resultTable">
+  <thead>
+    <tr>
+      <th>日期</th>
+      <th>起</th>
+      <th>迄</th>
+      <th>處理事項</th>
+      <th>里程數</th>
+      <th>交通工具</th>
+      <th>停車費</th>
+      <th>eTag</th>
+      <th>高鐵</th>
+      <th>總和</th>
+      <th>外出單號</th>
+      <th>Google 路線</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- 資料列由 app.js 動態產生 -->
+  </tbody>
+</table>
+
+</body>
+</html>
