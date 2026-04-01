@@ -112,7 +112,13 @@ window.addEventListener("DOMContentLoaded", () => {
         const tdTotal = `<td class="total"></td>`;
 
         const tdFormId = `<td>104 Max 外出單號：${formId}</td>`;
-        const tdMap = `<td><a href="${mapUrl}" target="_blank">開啟路線</a></td>`;
+        
+const tdMap = `
+  <td>
+    ${mapUrl}開啟路線</a>
+  </td>
+`;
+
 
         tr.innerHTML =
           tdDate +
