@@ -1,53 +1,68 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <title>外出經費申請輔助系統（V2.0）</title>
-
-  <!-- Excel library -->
-  <script src="../xlsx.full.min.js"></script>
-
-  <!-- V2.0 app.js（先與 V1.1 相同，下一步才改）-->
-  <script src="./app.js"></script>
-
+  <meta charset="UTF-8">
+  <title>外出經費申請輔助系統 V2.2.3.1 汐止出發專用</title>
   <style>
     body {
       font-family: "Microsoft JhengHei", Arial, sans-serif;
-      padding: 20px;
-    }
-    h2 {
-      margin-bottom: 12px;
+      padding: 16px;
     }
     table {
       border-collapse: collapse;
       width: 100%;
-      margin-top: 16px;
+      margin-top: 12px;
+      font-size: 14px;
     }
     th, td {
       border: 1px solid #ccc;
       padding: 6px 8px;
-      vertical-align: top;
+      text-align: center;
     }
     th {
-      background-color: #f3f3f3;
-      text-align: center;
+      background: #f3f3f3;
       white-space: nowrap;
     }
     td[contenteditable] {
-      background-color: #fffdf2;
+      background: #fffbe6;
     }
-    select {
-      width: 100%;
+    .toolbar {
+      margin-top: 12px;
+    }
+    .toolbar button {
+      margin-right: 8px;
+      padding: 6px 12px;
+    }
+    .usage {
+      background: #f9f9ff;
+      border: 1px solid #ccd;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .usage ol {
+      margin: 6px 0 0 18px;
     }
   </style>
 </head>
-
 <body>
 
-<h2>外出經費申請輔助系統（V2.0）</h2>
+<h2>外出經費申請輔助系統 V2.2.3 Stable</h2>
 
-<!-- Excel 匯入 -->
-<input type="file" id="excelFile" accept=".xlsx" />
+<!-- ✅ 使用步驟說明 -->
+<div class="usage">
+  <strong>使用步驟：</strong>
+  <ol>
+    <li>匯入 104 HR 外出單（Excel 檔案）</li>
+    <li>手動填入停車費與高鐵／車票金額（黃色欄位）</li>
+    <li>匯入 eTag 過路費 PDF（系統會自動對應日期計算）</li>
+  </ol>
+</div>
+
+<div class="toolbar">
+  <input type="file" id="excelFile" accept=".xlsx" />
+  <button id="etagBtn">匯入 eTag PDF</button>
+  <input type="file" id="etagFile" accept="application/pdf" style="display:none;" />
+</div>
 
 <table id="resultTable">
   <thead>
@@ -63,13 +78,17 @@
       <th>高鐵</th>
       <th>總和</th>
       <th>外出單號</th>
-      <th>Google 路線</th>
+      <th>路線</th>
     </tr>
   </thead>
-  <tbody>
-    <!-- 資料列由 app.js 動態產生 -->
-  </tbody>
+  <tbody></tbody>
 </table>
+
+<!-- ✅ script 載入順序固定，缺一不可 -->
+<script src="./xlsx.full.min.js"></script>
+<script src="./app.js"></script>
+<script src="./app_patch_pdf_init.js"></script>
+<script src="./etag.js"></script>
 
 </body>
 </html>
